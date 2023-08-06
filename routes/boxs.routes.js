@@ -1,8 +1,7 @@
-import express from 'express';
+import  { Router } from 'express';
 import { getAll, getOne, createOne } from '../controllers/boxsController.js';
-import db from '../db.js'
 
-const router = express.Router();
+const router = Router();
 
 router.get('/', async (req, res) => {
     getAll(req, res);

@@ -2,7 +2,7 @@ import { DataTypes } from "sequelize";
 import db from "../db.js";
 
 export const utilisateursModels = db.define('box', {
-    id_utilisateurs: {
+    id_utilisateur: {
         type: DataTypes.INTEGER,
         primaryKey: true,
         autoIncrement: true,
