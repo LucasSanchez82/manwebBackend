@@ -36,7 +36,7 @@ export const utilisateursValidation = async (body) => {
         return utilisateurSchemaResponse;
 
     }catch(error){
-        const utilisateurSchemaResponse = {error: error.details[0].context.message ? error.details[0].context.message : error.details[0].message};
+        const utilisateurSchemaResponse = {error: error.details[0].context.message || error.details[0].message};
         return utilisateurSchemaResponse;
     }
 }
