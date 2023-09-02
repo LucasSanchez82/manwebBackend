@@ -3,7 +3,12 @@ import { boxsValidation } from '../validation/modelsValidation.js'
 
 export const getAll = (req, res) => {
     try {
-        boxsModels.findAll()
+        console.log(req.session.id_utilisateur)
+        boxsModels.findAll({
+            where: {
+                id_utilisateur: req.session.utilisateur.id_utilisateur
+            }
+        })
         .then((el) => {
             res.json(el.map((e) => e.dataValues))
         })
@@ -35,8 +40,9 @@ export const getOne = (req, res) => {
 
 export const createOne = (req, res) => {
     const { body } = req;
+    body.id_utilisateur = req.session.utilisateur.id_utilisateur;
     const { error } = boxsValidation(body);
-    if(error) return res.status(401).json(error.details[0].message);
+    if(error) return res.status(401).json({error: error.details[0].message});
 
     boxsModels.create({...body})
     .then(() => {
