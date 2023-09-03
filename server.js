@@ -3,6 +3,7 @@ import boxsRouteur from './routes/boxs.routes.js'
 import cors from 'cors'
 import utilisateursRouter from './routes/utilisateurs.routes.js'
 import cookieSession from 'cookie-session'
+import { requireAuth } from './middlewares/authMiddleware.js';
 
 const app = express();
 // Configure CORS to allow requests from your frontend
@@ -22,11 +23,9 @@ app.use(cookieSession({
 
 app.use('/boxs', boxsRouteur);
 app.use('/utilisateurs', utilisateursRouter);
-app.post('/', (req, res) => {
-    req.session.view = (req.session.view || 0) + 1
-
-  // Write response
-  res.send(req.session.view + ' views')
+app.post('/logout', requireAuth,(req, res) => {
+    req.session = null;
+    res.status(200).json({message: 'deconnexion reussi'})
 })
 app.listen(3000, () => {
     console.log('app listen on 3000');
