@@ -3,7 +3,6 @@ import { boxsValidation } from '../validation/modelsValidation.js'
 
 export const getAll = (req, res) => {
     try {
-        console.log(req.session.id_utilisateur)
         boxsModels.findAll({
             where: {
                 id_utilisateur: req.session.utilisateur.id_utilisateur

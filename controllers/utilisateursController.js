@@ -1,6 +1,7 @@
 import { utilisateursModels } from '../models/utilisateursModel.js';
 import { utilisateursValidation } from '../validation/modelsValidation.js'
 import bcrypt from 'bcrypt';
+import { Mail } from './nodemailer.js';
 
 export const getAll = (req, res) => {
     try {
@@ -15,7 +16,22 @@ export const getAll = (req, res) => {
 };
 
 export const getOne = (req, res) => { };
+export const signIn = (req, res ) => {
+    //envoyer email avec code de verification
+        const mailConfig = new Mail(
+            'manweb <manweb_off@outlook.com>', 
+            'client <jiraya1008@gmail.com>',
+            'mail de test',
+            'text',
+            '<h1> html </h1>',
+            )
+        sendMail(mailConfig);
+    //attendre le code
 
+    //verifier si le code est correcte
+
+    // createOne(req, res)
+}
 export const createOne = async (req, res) => {
     const { body } = req;
     const { error: utilisateurValidationError } = await utilisateursValidation(body);
