@@ -1,7 +1,7 @@
 import { utilisateursModels } from '../models/utilisateursModel.js';
 import { utilisateursValidation } from '../validation/modelsValidation.js'
 import bcrypt from 'bcrypt';
-import { Mail } from './nodemailer.js';
+import { Mail, sendMail } from './nodemailer.js';
 
 export const getAll = (req, res) => {
     try {
@@ -17,13 +17,16 @@ export const getAll = (req, res) => {
 
 export const getOne = (req, res) => { };
 export const signIn = (req, res ) => {
+    //creer le jeton jwt
+
+
     //envoyer email avec code de verification
         const mailConfig = new Mail(
             'manweb <manweb_off@outlook.com>', 
-            'client <jiraya1008@gmail.com>',
-            'mail de test',
-            'text',
-            '<h1> html </h1>',
+            'client <jiraya1008@gmail.com>', //l'envoyer au bon client
+            'manweb verification de creation de compte', 
+            'voici le code : ', // afficher le code
+            '<p> Le code est :  </p>', // afficher le code
             )
         sendMail(mailConfig);
     //attendre le code

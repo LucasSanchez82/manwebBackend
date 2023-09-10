@@ -17,7 +17,7 @@ export const boxsValidation = (body) => {
 export const utilisateursValidation = async (body) => {
     const utilisateurSchema = Joi.object({
         pseudo: Joi.string().min(4).max(20).trim().required(),
-        email: Joi.string().email().required().external(async (value, helpers) => {
+        email: Joi.string().email().trim().lowercase().required().external(async (value, helpers) => {
             if (await isEmail(value)) {
                 return helpers.error('any.invalid', { message: 'L\'adresse e-mail existe déjà' });
             }
