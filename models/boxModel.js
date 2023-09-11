@@ -1,4 +1,4 @@
-import { BelongsTo, DataTypes } from "sequelize";
+import { DataTypes } from "sequelize";
 import db from "../db.js";
 import { utilisateursModels } from "./utilisateursModel.js";
 
@@ -36,7 +36,7 @@ const boxsModels = db.define('box', {
 })
 
 boxsModels.belongsTo(utilisateursModels, {
-    foreignKey: 'id_utilisateur', //clef etrangere
-    // targetKey: 'id_utilisateur' //clef primaire
+    foreignKey: 'id_utilisateur',
+    foreignKeyConstraint: true,
 });
 export {boxsModels};

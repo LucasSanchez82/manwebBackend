@@ -2,7 +2,8 @@ import { utilisateursModels } from '../models/utilisateursModel.js';
 import { utilisateursValidation } from '../validation/modelsValidation.js'
 import bcrypt from 'bcrypt';
 import { Mail, sendMail } from './nodemailer.js';
-
+import jwt from 'jsonwebtoken'
+import { tokenModel } from '../models/tokenModel.js';
 export const getAll = (req, res) => {
     try {
         utilisateursModels.findAll()
@@ -16,19 +17,19 @@ export const getAll = (req, res) => {
 };
 
 export const getOne = (req, res) => { };
-export const signIn = (req, res ) => {
+export const signIn = (req, res) => {
     //creer le jeton jwt
 
 
     //envoyer email avec code de verification
-        const mailConfig = new Mail(
-            'manweb <manweb_off@outlook.com>', 
-            'client <jiraya1008@gmail.com>', //l'envoyer au bon client
-            'manweb verification de creation de compte', 
-            'voici le code : ', // afficher le code
-            '<p> Le code est :  </p>', // afficher le code
-            )
-        sendMail(mailConfig);
+    const mailConfig = new Mail(
+        'manweb <manweb_off@outlook.com>',
+        'client <jiraya1008@gmail.com>', //l'envoyer au bon client
+        'manweb verification de creation de compte',
+        'voici le code : ', // afficher le code
+        '<p> Le code est :  </p>', // afficher le code
+    )
+    sendMail(mailConfig);
     //attendre le code
 
     //verifier si le code est correcte
@@ -55,10 +56,10 @@ export const login = async (req, res) => {
     const { error, message, utilisateur } = await utilisateurAuthentification(email, mdp)
     if (await error) return res.status(401).json({ error: error });
     if (await message) {
-        req.session.views =  (req.session.views || 0) + 1
+        req.session.views = (req.session.views || 0) + 1
         req.session.isLogin = true;
         req.session.utilisateur = utilisateur.dataValues;
-        return res.status(200).json({ message: message});
+        return res.status(200).json({ message: message });
     }
 
 
@@ -105,3 +106,66 @@ const utilisateurAuthentification = async (email, password) => {
         return { message: "Authentification réussie", utilisateur: utilisateur };
     } catch (error) { console.error(error) }
 };
+
+export const utilisateurSignIn = async (req, res) => {
+
+    try {
+        let tokenStr = jwt.sign({
+            email: 'email@gmail.com',
+        }, 'secret', { expiresIn: '1h' });
+
+        // const mailConfig = new Mail(
+        //     'manweb <manweb_off@outlook.com>',
+        //     'client <jiraya1008@gmail.com>', //https://www.google.com/search?q=nodejs+email+verification+code&sourceid=chrome&ie=UTF-8&bshm=rime/1
+        //     'Votre code de verification mail : ' + tokenStr,
+        //     'text',
+        //     `<h1> voici votre code de verification : <span>${tokenStr}</span> </h1>`,
+        // )
+        // sendMail(mailConfig);
+        try {
+            const existingToken = await tokenModel.findOne({
+                where: {
+                    id_utilisateur: req.session.utilisateur.id_utilisateur
+                }
+            });
+
+            if (existingToken) {
+                console.log("--update--");
+                await existingToken.update({
+                    token: tokenStr,
+                    created_at: new Date(),
+                });
+            } else {
+                console.log("--create--");
+                await tokenModel.create({
+                    id_utilisateur: req.session.utilisateur.id_utilisateur,
+                    token: tokenStr,
+                    created_at: new Date() // Assuming you want to set the creation date to now
+                });
+            }
+        } catch (error) {
+            console.error('Error:', error);
+        }
+
+        let html = /*html*/`
+            <h1> Email envoyé </h1>
+            <p> token : ${tokenStr} </p>
+        `;
+        return res.send(html);
+    } catch (error) {
+        console.log(error);
+        return res.send('<h1> erreur, echoué </h1>');
+    }
+}
+
+export const emailTokenValidator = async (req, res) => {
+    if (!req.params.id) throw Error('pas d id');
+    jwt.verify(req.params.id, 'secret', function (err, decoded) {
+        console.log(decoded)
+        console.log(err)
+    });
+    let html = /*html*/`
+        <p>${req.params.id}</p>
+    `;
+    res.send(html)
+}
