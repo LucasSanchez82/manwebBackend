@@ -1,7 +1,7 @@
 import { DataTypes } from "sequelize";
 import db from "../db.js";
 
-export const utilisateursModels = db.define('utilisateurs', {
+const utilisateursModels = db.define('utilisateurs', {
     id_utilisateur: {
         type: DataTypes.INTEGER,
         primaryKey: true,
@@ -20,8 +20,14 @@ export const utilisateursModels = db.define('utilisateurs', {
         type: DataTypes.STRING,
         allowNull: false,
     },
+    verifie: {
+        type: DataTypes.TINYINT,
+        allowNull: false,
+        defaultValue: 0,
+    }
 }, {
     tableName: 'utilisateurs', //titre de la base de donnee
     createdAt: false,
     updatedAt: false,
 })
+export {utilisateursModels};

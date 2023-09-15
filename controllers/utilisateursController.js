@@ -1,9 +1,12 @@
 import { utilisateursModels } from '../models/utilisateursModel.js';
-import { utilisateursValidation } from '../validation/modelsValidation.js'
+import { utilisateursValidation, verifieValidation } from '../validation/modelsValidation.js'
 import bcrypt from 'bcrypt';
 import { Mail, sendMail } from './nodemailer.js';
 import jwt from 'jsonwebtoken'
 import { tokenModel } from '../models/tokenModel.js';
+import crypto from 'crypto'
+import { log } from 'console';
+
 export const getAll = (req, res) => {
     try {
         utilisateursModels.findAll()
@@ -17,25 +20,25 @@ export const getAll = (req, res) => {
 };
 
 export const getOne = (req, res) => { };
-export const signIn = (req, res) => {
-    //creer le jeton jwt
+// export const signIn = (req, res) => {
+//     //creer le jeton jwt
 
 
-    //envoyer email avec code de verification
-    const mailConfig = new Mail(
-        'manweb <manweb_off@outlook.com>',
-        'client <jiraya1008@gmail.com>', //l'envoyer au bon client
-        'manweb verification de creation de compte',
-        'voici le code : ', // afficher le code
-        '<p> Le code est :  </p>', // afficher le code
-    )
-    sendMail(mailConfig);
-    //attendre le code
+//     //envoyer email avec code de verification
+//     const mailConfig = new Mail(
+//         'manweb <manweb_off@outlook.com>',
+//         'client <jiraya1008@gmail.com>', //l'envoyer au bon client
+//         'manweb verification de creation de compte',
+//         'voici le code : ', // afficher le code
+//         '<p> Le code est :  </p>', // afficher le code
+//     )
+//     sendMail(mailConfig);
+//     //attendre le code
 
-    //verifier si le code est correcte
+//     //verifier si le code est correcte
 
-    // createOne(req, res)
-}
+//     // createOne(req, res)
+// }
 export const createOne = async (req, res) => {
     const { body } = req;
     const { error: utilisateurValidationError } = await utilisateursValidation(body);
@@ -46,7 +49,8 @@ export const createOne = async (req, res) => {
     body.mdp = await hash;
     utilisateursModels.create({ ...body })
         .then(() => {
-            res.status(201).json({ message: "succesfuly created", item: { ...body }, test: body })
+            sendTokenToEmail(body.email);
+            return res.status(201).json({ message: "email de verification envoyé", item: { ...body }, test: body })
         })
         .catch(error => res.status(500).json(error));
 };
@@ -92,10 +96,13 @@ const passwordHash = (password) => {
 const utilisateurAuthentification = async (email, password) => {
     try {
         const utilisateur = await utilisateursModels.findOne({ where: { email: email } });
-
+        console.log(utilisateur);
         if (!utilisateur) {
             return { error: "Utilisateur non trouvé" };
+        }else if(!utilisateur.dataValues.verifie){
+            return {error: "le compte n' pas été vérifié"}
         }
+
 
         const isPasswordMatch = await bcrypt.compare(password, utilisateur.mdp);
 
@@ -107,25 +114,36 @@ const utilisateurAuthentification = async (email, password) => {
     } catch (error) { console.error(error) }
 };
 
-export const utilisateurSignIn = async (req, res) => {
+export const sendTokenToEmail = async (email) => {
 
     try {
-        let tokenStr = jwt.sign({
-            email: 'email@gmail.com',
-        }, 'secret', { expiresIn: '1h' });
+        let utilisateur = await utilisateursModels.findOne({
+            where: {
+                email: email,
+            }
+        })
+        let tokenStr = crypto.randomBytes(40).toString('hex');
 
-        // const mailConfig = new Mail(
-        //     'manweb <manweb_off@outlook.com>',
-        //     'client <jiraya1008@gmail.com>', //https://www.google.com/search?q=nodejs+email+verification+code&sourceid=chrome&ie=UTF-8&bshm=rime/1
-        //     'Votre code de verification mail : ' + tokenStr,
-        //     'text',
-        //     `<h1> voici votre code de verification : <span>${tokenStr}</span> </h1>`,
-        // )
-        // sendMail(mailConfig);
+    let hrefVerify = `${process.env.FRONTEND_URL}/confirm/${utilisateur.id_utilisateur}/${tokenStr}`
+       const bodyMail = /*html*/`
+       <h1> voici votre code de verification :  </h1>
+       <span>${tokenStr}</span>
+       <p> vous pouvez aussi cliquer sur ce lien : <a href="${hrefVerify}" > ${hrefVerify} </a>
+       `
+
+        const mailConfig = new Mail(
+            'manweb <manweb_off@outlook.com>',
+            `client <${email}>`, //https://www.google.com/search?q=nodejs+email+verification+code&sourceid=chrome&ie=UTF-8&bshm=rime/1
+            'Votre code de verification mail : ',
+            'text',
+            hrefVerify,
+        )
+        sendMail(mailConfig);
+
         try {
             const existingToken = await tokenModel.findOne({
                 where: {
-                    id_utilisateur: req.session.utilisateur.id_utilisateur
+                    id_utilisateur: utilisateur.id_utilisateur,
                 }
             });
 
@@ -138,7 +156,7 @@ export const utilisateurSignIn = async (req, res) => {
             } else {
                 console.log("--create--");
                 await tokenModel.create({
-                    id_utilisateur: req.session.utilisateur.id_utilisateur,
+                    id_utilisateur: utilisateur.id_utilisateur,
                     token: tokenStr,
                     created_at: new Date() // Assuming you want to set the creation date to now
                 });
@@ -151,10 +169,9 @@ export const utilisateurSignIn = async (req, res) => {
             <h1> Email envoyé </h1>
             <p> token : ${tokenStr} </p>
         `;
-        return res.send(html);
     } catch (error) {
         console.log(error);
-        return res.send('<h1> erreur, echoué </h1>');
+        return { error: 'erreur lors de l\'envoi du token' }
     }
 }
 
@@ -169,3 +186,41 @@ export const emailTokenValidator = async (req, res) => {
     `;
     res.send(html)
 }
+export const signInVerify = async (req, res) => {
+    const { idUtilisateur, token } = req.body;
+    // if(!idUtilisateur || !token) return res.send(500).json({error : 'idUtilisateur ou token null'})
+    const { error } = verifieValidation({idUtilisateur, token})
+    if (error) return res.status(401).json({ error, error })
+
+    try {
+        const utilisateur = await utilisateursModels.findByPk(idUtilisateur);
+
+        if (!utilisateur) {
+            return res.status(404).json({ error: 'Utilisateur not found' });
+        }
+ 
+        const tokenEntry = await tokenModel.findOne({
+            where: {
+                id_utilisateur: idUtilisateur,
+                token: token
+            }
+        });
+
+        if (!tokenEntry) {
+            return res.status(403).json({ error: 'Invalid token' });
+        }
+
+        // Update 'verifie' to 1
+        await utilisateursModels.update({ verifie: 1 }, {
+            where: { id_utilisateur: idUtilisateur }
+        });
+
+
+        res.status(200).json({ message: 'user verify succesfuly' });
+        await tokenEntry.destroy();
+    } catch (error) {
+        console.error(error);
+        res.status(500).send('Internal Server Error');
+    }
+}
+

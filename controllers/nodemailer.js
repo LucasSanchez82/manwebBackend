@@ -19,7 +19,6 @@ const sendMail = (mail) => {
                 return process.exit(1);
             }
     
-            console.log('Credentials obtained, sending message...');
     
             // NB! Store the account object values somewhere if you want
             // to re-use the same account for future mail deliveries
@@ -64,6 +63,7 @@ const sendMail = (mail) => {
                 html: mail.html,
             }
             transporter.sendMail(message, (error, info) => {
+                // console.log();
                 console.log({error: error, info: info})
             })
         });

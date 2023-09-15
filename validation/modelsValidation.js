@@ -29,7 +29,7 @@ export const utilisateursValidation = async (body) => {
             'any.only': 'La confirmation du mot de passe doit correspondre au mot de passe',
         }),
 
-        mdpForCreateUser: Joi.string().valid(process.env.PASSWORD_FOR_CREATE_USERS).messages({'any.only': 'mot de passe erronée'}).required()
+        // mdpForCreateUser: Joi.string().valid(process.env.PASSWORD_FOR_CREATE_USERS).messages({'any.only': 'mot de passe erronée'}).required()
     })
     try{
         const utilisateurSchemaResponse =  await utilisateurSchema.validateAsync(body);
@@ -38,5 +38,24 @@ export const utilisateursValidation = async (body) => {
     }catch(error){
         const utilisateurSchemaResponse = {error: error.details[0].context.message || error.details[0].message};
         return utilisateurSchemaResponse;
+    }
+}
+
+export const verifieValidation = (body) => {
+    const verifieSchema = Joi.object({
+        idUtilisateur: Joi.number().required(),
+        token: Joi.string().required(),
+    })
+    try{
+        // console.log('from validation successs : ', verifieSchema.validate(body));
+
+        return verifieSchema.validate(body);
+
+    }catch(error){
+        // const utilisateurSchemaResponse = {error: error.details[0].context.message || error.details[0].message};
+        // console.log('from validation error : ', error.details[0].context.message || error.details[0].message);
+        return {error: error.details[0].context.message || error.details[0].message};
+        
+
     }
 }

@@ -30,35 +30,35 @@ app.post('/logout', requireAuth, (req, res) => {
     req.session = null;
     res.status(200).json({ message: 'deconnexion reussi' })
 })
-app.get('/test', async (req, res) => {
+// app.get('/test', async (req, res) => {
     
-    try {
-        // let tokenInstance = new tokenModel();
-        let tokenStr = jwt.sign({
-            email: 'email@gmail.com',
-        }, 'secret', { expiresIn: '1h' });
+//     try {
+//         // let tokenInstance = new tokenModel();
+//         let tokenStr = jwt.sign({
+//             email: 'email@gmail.com',
+//         }, 'secret', { expiresIn: '1h' });
 
-        // const mailConfig = new Mail(
-        //     'manweb <manweb_off@outlook.com>',
-        //     'client <jiraya1008@gmail.com>',https://www.google.com/search?q=nodejs+email+verification+code&sourceid=chrome&ie=UTF-8&bshm=rime/1
-        //     'Votre code de verification mail : ' + tokenStr,
-        //     'text',
-        //     `<h1> voici votre code de verification : <span>${tokenStr}</span> </h1>`,
-        // )
-        // sendMail(mailConfig);
-        jwt.verify(tokenStr, 'secret', function (err, decoded) {
-            console.log(decoded)
-        });
-        let html = /*html*/`
-            <h1> Email envoyé </h1>
-            <p> token : ${tokenStr} </p>
-        `;
-        return res.send(html);
-    } catch (error) {
-        console.log(error);
-        return res.send('<h1> erreur, echoué </h1>');
-    }
-})
+//         // const mailConfig = new Mail(
+//         //     'manweb <manweb_off@outlook.com>',
+//         //     'client <jiraya1008@gmail.com>',https://www.google.com/search?q=nodejs+email+verification+code&sourceid=chrome&ie=UTF-8&bshm=rime/1
+//         //     'Votre code de verification mail : ' + tokenStr,
+//         //     'text',
+//         //     `<h1> voici votre code de verification : <span>${tokenStr}</span> </h1>`,
+//         // )
+//         // sendMail(mailConfig);
+//         jwt.verify(tokenStr, 'secret', function (err, decoded) {
+//             console.log(decoded)
+//         });
+//         let html = /*html*/`
+//             <h1> Email envoyé </h1>
+//             <p> token : ${tokenStr} </p>
+//         `;
+//         return res.send(html);
+//     } catch (error) {
+//         console.log(error);
+//         return res.send('<h1> erreur, echoué </h1>');
+//     }
+// })
 app.listen(3000, () => {
     console.log('app listen on 3000');
 })
