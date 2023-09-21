@@ -6,7 +6,11 @@ export const getAll = (req, res) => {
         boxsModels.findAll({
             where: {
                 id_utilisateur: req.session.utilisateur.id_utilisateur
-            }
+            },
+            order: [
+                ['id_box', 'DESC']
+            ]
+            
         })
         .then((el) => {
             res.json(el.map((e) => e.dataValues))
@@ -58,11 +62,14 @@ export const updateOne = async (req, res) => {
     try{
         if(!id_box) {
             return res.status(401).json({error: "id_box necessaire"});
-        } else if(!new_numero_chapitre){
+        } else if(new_numero_chapitre === undefined || new_numero_chapitre === null){
+            console.log('new_numero_chapitre necessaire');
             return res.status(401).json({error: "new_numero_chapitre necessaire"});
         }else if (parseInt(id_box) === NaN){
+            console.log('id_box doit etre un nombre');
             return res.status(401).json({error: "id_box doit etre un nombre"});
         }else if( parseInt(new_numero_chapitre) === NaN){
+            console.log('new_numero_chapitre doit etre un nombre');
             return res.status(401).json({error: "new_numero_chapitre doit etre un nombre"});
         }
         const response = await boxsModels.update({numero_chapitre: parseInt(new_numero_chapitre)}, {

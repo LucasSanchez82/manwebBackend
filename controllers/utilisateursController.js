@@ -216,7 +216,7 @@ export const signInVerify = async (req, res) => {
         });
 
 
-        res.status(200).json({ message: 'user verify succesfuly' });
+        res.status(200).json({ message: 'Success verify of account' });
         await tokenEntry.destroy();
     } catch (error) {
         console.error(error);
