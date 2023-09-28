@@ -59,3 +59,18 @@ export const verifieValidation = (body) => {
 
     }
 }
+
+export const verifieBoxUpdate = (body) => {
+    const verifieSchema = Joi.object({
+        id_box: Joi.number().required(),
+        titre: Joi.string().required().min(3).max(100),
+        lien: Joi.string().required().uri(),
+        lien_image: Joi.string().required().uri(),
+    })
+
+    try{
+        return verifieSchema.validate(body);
+    }catch(error){
+        return {error: error.details[0].context.message || error.details[0].message};
+    }
+}

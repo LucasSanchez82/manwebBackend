@@ -20,25 +20,7 @@ export const getAll = (req, res) => {
 };
 
 export const getOne = (req, res) => { };
-// export const signIn = (req, res) => {
-//     //creer le jeton jwt
 
-
-//     //envoyer email avec code de verification
-//     const mailConfig = new Mail(
-//         'manweb <manweb_off@outlook.com>',
-//         'client <jiraya1008@gmail.com>', //l'envoyer au bon client
-//         'manweb verification de creation de compte',
-//         'voici le code : ', // afficher le code
-//         '<p> Le code est :  </p>', // afficher le code
-//     )
-//     sendMail(mailConfig);
-//     //attendre le code
-
-//     //verifier si le code est correcte
-
-//     // createOne(req, res)
-// }
 export const createOne = async (req, res) => {
     const { body } = req;
     const { error: utilisateurValidationError } = await utilisateursValidation(body);
@@ -108,9 +90,7 @@ const utilisateurAuthentification = async (email, password) => {
 
         if (!isPasswordMatch) {
             return { error: "Mot de passe incorrect" };
-        }
-
-        return { message: "Authentification réussie", utilisateur: utilisateur };
+        }else return { message: "Authentification réussie", utilisateur: utilisateur };
     } catch (error) { console.error(error) }
 };
 

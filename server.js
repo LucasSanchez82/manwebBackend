@@ -30,6 +30,11 @@ app.post('/logout', requireAuth, (req, res) => {
     req.session = null;
     res.status(200).json({ message: 'deconnexion reussi' })
 })
+
+app.get('', requireAuth, (req, res) => {
+    res.send('<h1> manweb api </h1>')
+})
+
 // app.get('/test', async (req, res) => {
     
 //     try {
